@@ -3,101 +3,461 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CV Forge - Standalone</title>
+    <title>Pro Resume Builder - Premium</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Merriweather:wght@300;400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Lato:wght@300;400;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
-        /* --- GLOBAL VARIABLES --- */
-        :root { --primary: #4f46e5; --dark: #1f2937; --light: #f3f4f6; }
-        body { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; background-color: var(--light); height: 100vh; overflow: hidden; }
-        
-        /* PAGE LOGIC */
-        .page { display: none !important; height: 100vh; width: 100%; }
-        .page.active { display: flex !important; }
+        /* --- UI RESET & LAYOUT --- */
+        :root { --primary: #2563eb; --bg: #f3f4f6; --sidebar: 400px; }
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background: var(--bg); font-family: 'Inter', sans-serif; height: 100vh; display: flex; overflow: hidden; }
 
-        /* --- 1. LANDING PAGE STYLES --- */
-        #landing-page { 
-            background: linear-gradient(135deg, #111827 0%, #000 100%); 
-            color: white; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            text-align: center; 
-        }
-        .hero-title { font-size: 4rem; margin-bottom: 10px; background: linear-gradient(to right, #818cf8, #c7d2fe); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .hero-sub { color: #9ca3af; margin-bottom: 40px; font-size: 1.2rem; }
-        .btn-main { padding: 15px 50px; font-size: 1.2rem; background: var(--primary); color: white; border: none; border-radius: 50px; cursor: pointer; transition: 0.2s; font-weight: 600; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); }
-        .btn-main:hover { transform: translateY(-3px); background: #4338ca; }
-
-        /* --- 2. EDITOR STYLES --- */
-        #app-page { flex-direction: row; }
-        
-        /* Sidebar */
-        .editor { 
-            width: 420px; 
-            background: white; 
-            border-right: 1px solid #ddd; 
-            overflow-y: auto; 
-            padding: 25px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            height: 100vh; 
-            box-sizing: border-box; 
+        /* --- LEFT PANEL: EDITOR --- */
+        .editor-panel {
+            width: var(--sidebar);
+            background: white;
+            border-right: 1px solid #e5e7eb;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            z-index: 10;
         }
 
-        .section-header { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #555; border-bottom: 2px solid #f0f0f0; padding-bottom: 5px; margin-top: 20px; letter-spacing: 1px; }
-        
-        input, select, textarea { 
-            width: 100%; 
-            padding: 10px; 
-            border: 1px solid #ddd; 
-            border-radius: 6px; 
-            font-family: inherit; 
-            font-size: 0.9rem; 
-            margin-bottom: 8px; 
-            background: #fafafa; 
-            box-sizing: border-box; 
-        }
-        input:focus, textarea:focus { outline: none; border-color: var(--primary); background: white; }
-        
-        /* Dynamic List Items */
-        .dynamic-item { background: #f8f9fa; padding: 15px; border-radius: 6px; border: 1px solid #e9ecef; position: relative; margin-bottom: 10px; }
-        .btn-del { position: absolute; top: 8px; right: 8px; color: #ff4757; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 0.8rem; }
-        .btn-add { width: 100%; padding: 8px; border: 1px dashed #aaa; color: #666; background: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
-        .btn-add:hover { border-color: var(--primary); color: var(--primary); background: #f0f7ff; }
+        .editor-header { padding: 20px; border-bottom: 1px solid #eee; background: white; }
+        .logo { font-size: 1.2rem; font-weight: 800; color: #111; letter-spacing: -0.5px; }
+        .logo span { color: var(--primary); }
 
-        /* --- 3. PREVIEW STYLES --- */
-        .preview-container { flex-grow: 1; background: #525659; display: flex; justify-content: center; align-items: flex-start; padding: 40px; overflow-y: auto; height: 100vh; box-sizing: border-box; }
-        
+        .editor-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+        /* Form Styling */
+        .group-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #6b7280; margin: 25px 0 10px 0; letter-spacing: 0.5px; border-bottom: 2px solid #f3f4f6; padding-bottom: 5px; }
+        .group-title:first-child { margin-top: 0; }
+
+        label { font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 4px; display: block; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.9rem; margin-bottom: 10px; transition: 0.2s; font-family: 'Inter', sans-serif; }
+        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; ring: 2px solid rgba(37,99,235,0.1); }
+        textarea { height: 80px; resize: vertical; }
+
+        /* Dynamic Items */
+        .dynamic-list { display: flex; flex-direction: column; gap: 10px; }
+        .dynamic-item { background: #f9fafb; border: 1px solid #e5e7eb; padding: 15px; border-radius: 8px; position: relative; }
+        .btn-remove { position: absolute; top: 10px; right: 10px; color: #ef4444; background: none; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; }
+        .btn-add { width: 100%; padding: 10px; background: white; border: 1px dashed #9ca3af; color: #4b5563; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500; transition: 0.2s; }
+        .btn-add:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+
+        /* Download Button */
+        .editor-footer { padding: 20px; border-top: 1px solid #eee; background: white; }
+        .btn-download { width: 100%; padding: 14px; background: #111; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-download:hover { background: var(--primary); }
+
+        /* --- RIGHT PANEL: PREVIEW --- */
+        .preview-panel {
+            flex: 1;
+            background: #525659;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
         #cv-paper {
             width: 210mm;
             min-height: 297mm;
             background: white;
             box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            margin-bottom: 40px;
+            /* Default font size for readability */
+            font-size: 10pt; 
             color: #333;
-            overflow: hidden;
-            display: grid;
-            grid-template-columns: 35% 65%;
-            font-family: 'Roboto', sans-serif;
-            transition: all 0.3s ease;
+            line-height: 1.5;
+            overflow: hidden; /* Ensures content doesn't spill out */
         }
 
-        /* --- COMMON CV ELEMENTS --- */
-        .cv-img { width: 140px; height: 140px; border-radius: 50%; object-fit: cover; margin: 0 auto 20px; display: block; }
-        .skill-pill { display: inline-block; padding: 3px 8px; background: #eee; margin: 2px; border-radius: 4px; font-size: 0.8rem; }
-        .item-row { margin-bottom: 15px; page-break-inside: avoid; }
-        .item-title { font-weight: bold; font-size: 1rem; }
-        .item-sub { font-size: 0.85rem; font-style: italic; opacity: 0.8; margin-bottom: 2px; }
-        .item-desc { font-size: 0.85rem; line-height: 1.4; opacity: 0.9; white-space: pre-wrap; }
+        /* --- UNIVERSAL CV STYLES (Used in all templates) --- */
+        .cv-img { width: 120px; height: 120px; object-fit: cover; border-radius: 50%; display: block; }
+        .hidden { display: none !important; }
+        
+        /* Icons */
+        .icon { width: 16px; text-align: center; margin-right: 8px; display: inline-block; }
 
-        /* --- TEMPLATE 1: MODERN --- */
-        [data-layout="modern"] { grid-template-columns: 35% 65%; }
-        [data-layout="modern"] .col-left { background: var(--cv-color); color: white; padding: 30px; }
-        [data-layout="modern"] .col-right { padding: 30px; background: white; }
-        [data-layout="modern"] .cv-name { color: var(--cv-color); font-size: 2.5rem; font-weight: 700; line-height: 1; }
-        [data-layout="modern"] .cv-role { font-size: 1.1rem; text-transform: uppercase; letter-spacing:
+        /* --- TEMPLATE 1: IVY LEAGUE (Classic / ATS) --- */
+        [data-template="ivy"] {
+            font-family: 'Merriweather', serif;
+            padding: 40px 50px;
+            color: #000;
+        }
+        [data-template="ivy"] .cv-header { text-align: center; border-bottom: 1px solid #000; padding-bottom: 20px; margin-bottom: 20px; }
+        [data-template="ivy"] .cv-name { font-size: 24pt; font-weight: 700; text-transform: uppercase; margin: 0; letter-spacing: 1px; }
+        [data-template="ivy"] .cv-role { font-size: 12pt; font-style: italic; margin-top: 5px; }
+        [data-template="ivy"] .cv-contact { font-size: 9pt; margin-top: 10px; }
+        [data-template="ivy"] .cv-contact span { margin: 0 5px; }
+        [data-template="ivy"] .cv-section { margin-bottom: 20px; }
+        [data-template="ivy"] .cv-section-title { font-size: 11pt; font-weight: 700; text-transform: uppercase; border-bottom: 1px solid #000; margin-bottom: 10px; padding-bottom: 3px; letter-spacing: 0.5px; }
+        [data-template="ivy"] .cv-item { margin-bottom: 12px; }
+        [data-template="ivy"] .cv-item-header { display: flex; justify-content: space-between; font-weight: 700; font-size: 10pt; }
+        [data-template="ivy"] .cv-item-sub { font-style: italic; font-size: 10pt; margin-bottom: 3px; }
+        [data-template="ivy"] .cv-item-desc { font-size: 10pt; text-align: justify; }
+        [data-template="ivy"] .cv-img { display: none; } /* No photos on academic CVs */
+        [data-template="ivy"] .skill-tag { display: inline; font-weight: 400; }
+        [data-template="ivy"] .skill-tag::after { content: " • "; }
+        [data-template="ivy"] .skill-tag:last-child::after { content: ""; }
+
+        /* --- TEMPLATE 2: SILICON VALLEY (Clean / Modern) --- */
+        [data-template="silicon"] {
+            font-family: 'Inter', sans-serif;
+            padding: 40px;
+            color: #333;
+        }
+        [data-template="silicon"] .cv-header { margin-bottom: 30px; }
+        [data-template="silicon"] .cv-name { font-size: 28pt; font-weight: 800; letter-spacing: -1px; color: #111; line-height: 1; }
+        [data-template="silicon"] .cv-role { font-size: 14pt; color: var(--theme-color); font-weight: 500; margin-top: 5px; }
+        [data-template="silicon"] .cv-contact { font-size: 9pt; color: #666; margin-top: 15px; display: flex; gap: 15px; flex-wrap: wrap; }
+        [data-template="silicon"] .main-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 40px; }
+        [data-template="silicon"] .cv-section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #999; margin-bottom: 15px; }
+        [data-template="silicon"] .cv-item { margin-bottom: 20px; }
+        [data-template="silicon"] .cv-item-header { font-weight: 700; font-size: 11pt; color: #111; }
+        [data-template="silicon"] .cv-item-sub { font-size: 9pt; color: #666; margin-bottom: 5px; }
+        [data-template="silicon"] .cv-img { width: 80px; height: 80px; margin-bottom: 20px; }
+        [data-template="silicon"] .skill-tag { display: inline-block; background: #f3f4f6; padding: 4px 8px; border-radius: 4px; font-size: 9pt; margin: 0 5px 5px 0; font-weight: 500; }
+
+        /* --- TEMPLATE 3: EXECUTIVE (Banner / Bold) --- */
+        [data-template="executive"] {
+            font-family: 'Lato', sans-serif;
+            padding: 0;
+            background: white;
+        }
+        [data-template="executive"] .cv-header { background: var(--theme-color); color: white; padding: 40px 50px; }
+        [data-template="executive"] .cv-name { font-size: 30pt; font-weight: 300; text-transform: uppercase; letter-spacing: 2px; margin: 0; }
+        [data-template="executive"] .cv-role { font-size: 11pt; font-weight: 700; letter-spacing: 1px; opacity: 0.9; margin-top: 5px; text-transform: uppercase;}
+        [data-template="executive"] .cv-contact { margin-top: 15px; font-size: 9pt; opacity: 0.9; }
+        [data-template="executive"] .cv-contact span { margin-right: 15px; }
+        [data-template="executive"] .cv-body { padding: 40px 50px; column-count: 2; column-gap: 40px; }
+        [data-template="executive"] .cv-section { break-inside: avoid; margin-bottom: 25px; }
+        [data-template="executive"] .cv-section-title { font-size: 12pt; color: var(--theme-color); font-weight: 700; border-bottom: 2px solid #eee; margin-bottom: 10px; padding-bottom: 5px; text-transform: uppercase; }
+        [data-template="executive"] .cv-item-header { font-weight: 700; font-size: 10.5pt; }
+        [data-template="executive"] .cv-item-sub { font-size: 9pt; color: #666; font-style: italic; }
+        [data-template="executive"] .cv-img { display: none; }
+        [data-template="executive"] .skill-tag { display: block; border-bottom: 1px solid #eee; padding: 3px 0; font-size: 9pt; }
+
+        /* --- TEMPLATE 4: CREATIVE (Sidebar / Split) --- */
+        [data-template="creative"] {
+            display: grid;
+            grid-template-columns: 35% 65%;
+            font-family: 'Inter', sans-serif;
+            height: 100%;
+        }
+        [data-template="creative"] .left-col { background: #2d2d2d; color: white; padding: 40px 30px; height: 100%; min-height: 297mm; }
+        [data-template="creative"] .right-col { background: white; padding: 40px 30px; }
+        [data-template="creative"] .cv-name { font-size: 26pt; font-weight: 800; line-height: 1.1; margin-bottom: 10px; }
+        [data-template="creative"] .cv-role { font-size: 12pt; color: var(--theme-color); font-weight: 600; text-transform: uppercase; margin-bottom: 30px; }
+        [data-template="creative"] .left-section-title { font-size: 10pt; font-weight: 700; text-transform: uppercase; color: #999; margin: 30px 0 15px 0; letter-spacing: 1px; }
+        [data-template="creative"] .right-section-title { font-size: 14pt; font-weight: 700; color: #2d2d2d; border-bottom: 3px solid var(--theme-color); padding-bottom: 5px; margin: 25px 0 15px 0; display: inline-block; }
+        [data-template="creative"] .contact-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font-size: 9pt; color: #ddd; }
+        [data-template="creative"] .skill-tag { background: rgba(255,255,255,0.1); padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 0 5px 5px 0; font-size: 9pt; }
+        [data-template="creative"] .cv-img { border: 3px solid rgba(255,255,255,0.2); margin-bottom: 30px; width: 150px; height: 150px; }
+
+    </style>
+</head>
+<body>
+
+    <div class="editor-panel">
+        <div class="editor-header">
+            <div class="logo">CV<span>Forge</span></div>
+        </div>
+
+        <div class="editor-content">
+            <div class="group-title">1. Choose Template</div>
+            <select id="templateSelect" onchange="render()">
+                <option value="ivy">Ivy League (Classic/Academic)</option>
+                <option value="silicon">Silicon Valley (Modern/Tech)</option>
+                <option value="executive">Executive (Management)</option>
+                <option value="creative">Creative (Designer)</option>
+            </select>
+            
+            <label>Accent Color</label>
+            <input type="color" id="accentColor" value="#2563eb" oninput="render()" style="height:40px; padding:2px;">
+
+            <label>Language</label>
+            <select id="langSelect" onchange="updateLabels()">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+
+            <div class="group-title">2. Personal Details</div>
+            <label>Profile Picture</label>
+            <input type="file" accept="image/*" onchange="handleImage(event)">
+            
+            <label>Full Name</label>
+            <input type="text" id="name" placeholder="John Doe" oninput="render()">
+            
+            <label>Job Title</label>
+            <input type="text" id="role" placeholder="Software Engineer" oninput="render()">
+            
+            <label>Summary</label>
+            <textarea id="summary" placeholder="Brief professional summary..." oninput="render()"></textarea>
+
+            <div class="group-title">3. Contact</div>
+            <input type="text" id="email" placeholder="Email" oninput="render()">
+            <input type="text" id="phone" placeholder="Phone" oninput="render()">
+            <input type="text" id="location" placeholder="Location" oninput="render()">
+
+            <div class="group-title">4. Experience</div>
+            <div id="exp-list" class="dynamic-list"></div>
+            <button class="btn-add" onclick="addItem('exp')">+ Add Job</button>
+
+            <div class="group-title">5. Education</div>
+            <div id="edu-list" class="dynamic-list"></div>
+            <button class="btn-add" onclick="addItem('edu')">+ Add School</button>
+
+            <div class="group-title">6. Skills</div>
+            <textarea id="skills" placeholder="Comma separated (e.g. Java, Python, Leadership)" oninput="render()" style="height:60px;"></textarea>
+            
+            <div class="group-title">7. Languages</div>
+            <textarea id="languages" placeholder="Comma separated (e.g. English, French)" oninput="render()" style="height:60px;"></textarea>
+            
+            <div class="group-title">8. Certifications</div>
+            <div id="cert-list" class="dynamic-list"></div>
+            <button class="btn-add" onclick="addItem('cert')">+ Add Certificate</button>
+
+        </div>
+
+        <div class="editor-footer">
+            <button class="btn-download" onclick="generatePDF()">
+                <i class="fas fa-download"></i> Download PDF
+            </button>
+        </div>
+    </div>
+
+    <div class="preview-panel">
+        <div id="cv-paper" data-template="ivy">
+            </div>
+    </div>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        const state = {
+            exp: [],
+            edu: [],
+            cert: [],
+            img: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" // Transparent placeholder
+        };
+
+        const labels = {
+            en: { exp: "Experience", edu: "Education", skills: "Skills", lang: "Languages", cert: "Certifications", profile: "Profile", contact: "Contact" },
+            fr: { exp: "Expérience", edu: "Formation", skills: "Compétences", lang: "Langues", cert: "Certifications", profile: "Profil", contact: "Contact" }
+        };
+
+        // --- FUNCTIONS ---
+
+        function handleImage(e) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                state.img = event.target.result;
+                render();
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        }
+
+        function addItem(type) {
+            state[type].push({ id: Date.now(), title: "", sub: "", desc: "" });
+            drawInputs(type);
+            render();
+        }
+
+        function removeItem(type, id) {
+            state[type] = state[type].filter(i => i.id !== id);
+            drawInputs(type);
+            render();
+        }
+
+        function updateItem(type, id, field, val) {
+            const item = state[type].find(i => i.id === id);
+            item[field] = val;
+            render();
+        }
+
+        function drawInputs(type) {
+            const container = document.getElementById(type + '-list');
+            container.innerHTML = "";
+            state[type].forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'dynamic-item';
+                div.innerHTML = `
+                    <button class="btn-remove" onclick="removeItem('${type}', ${item.id})">Remove</button>
+                    <input type="text" placeholder="Title / Degree" value="${item.title}" oninput="updateItem('${type}', ${item.id}, 'title', this.value)">
+                    <input type="text" placeholder="Company / School | Date" value="${item.sub}" oninput="updateItem('${type}', ${item.id}, 'sub', this.value)">
+                    ${type === 'cert' ? '' : `<textarea placeholder="Description..." oninput="updateItem('${type}', ${item.id}, 'desc', this.value)">${item.desc}</textarea>`}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateLabels() {
+            render();
+        }
+
+        // --- MAIN RENDERER (The Engine) ---
+        function render() {
+            const template = document.getElementById('templateSelect').value;
+            const lang = document.getElementById('langSelect').value;
+            const color = document.getElementById('accentColor').value;
+            const txt = labels[lang];
+
+            const paper = document.getElementById('cv-paper');
+            paper.setAttribute('data-template', template);
+            paper.style.setProperty('--theme-color', color);
+
+            // Get Data
+            const name = document.getElementById('name').value || "Your Name";
+            const role = document.getElementById('role').value || "Job Title";
+            const summary = document.getElementById('summary').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const loc = document.getElementById('location').value;
+            const skills = document.getElementById('skills').value.split(',').filter(s => s.trim());
+            const languages = document.getElementById('languages').value.split(',').filter(s => s.trim());
+
+            // --- HTML GENERATION BASED ON TEMPLATE ---
+            
+            let html = "";
+
+            // Helper to render Experience/Education items
+            const renderItems = (items) => items.map(i => `
+                <div class="cv-item">
+                    <div class="cv-item-header">${i.title}</div>
+                    <div class="cv-item-sub">${i.sub}</div>
+                    ${i.desc ? `<div class="cv-item-desc">${i.desc.replace(/\n/g, '<br>')}</div>` : ''}
+                </div>
+            `).join('');
+
+            // Helper for Skills/Lang
+            const renderTags = (items, cls) => items.map(i => `<span class="${cls}">${i.trim()}</span>`).join('');
+
+            // ---------------- TEMPLATE LOGIC ---------------- //
+
+            if (template === 'ivy' || template === 'executive') {
+                // Single Column Layouts (Ivy & Executive)
+                
+                // Header Area
+                html += `<div class="cv-header">
+                            <h1 class="cv-name">${name}</h1>
+                            <div class="cv-role">${role}</div>
+                            <div class="cv-contact">
+                                ${email ? `<span><i class="fas fa-envelope icon"></i>${email}</span>` : ''}
+                                ${phone ? `<span><i class="fas fa-phone icon"></i>${phone}</span>` : ''}
+                                ${loc ? `<span><i class="fas fa-map-marker-alt icon"></i>${loc}</span>` : ''}
+                            </div>
+                         </div>`;
+                
+                // Body Area (Columns for Executive, Stacked for Ivy)
+                html += template === 'executive' ? `<div class="cv-body">` : `<div style="padding: 0 40px;">`;
+
+                if (summary) {
+                    html += `<div class="cv-section">
+                                <div class="cv-section-title">${txt.profile}</div>
+                                <div class="cv-item-desc">${summary}</div>
+                             </div>`;
+                }
+
+                if (state.exp.length > 0) {
+                    html += `<div class="cv-section"><div class="cv-section-title">${txt.exp}</div>${renderItems(state.exp)}</div>`;
+                }
+                if (state.edu.length > 0) {
+                    html += `<div class="cv-section"><div class="cv-section-title">${txt.edu}</div>${renderItems(state.edu)}</div>`;
+                }
+                if (skills.length > 0) {
+                    html += `<div class="cv-section"><div class="cv-section-title">${txt.skills}</div><div>${renderTags(skills, 'skill-tag')}</div></div>`;
+                }
+                if (languages.length > 0) {
+                    html += `<div class="cv-section"><div class="cv-section-title">${txt.lang}</div><div>${renderTags(languages, 'skill-tag')}</div></div>`;
+                }
+                if (state.cert.length > 0) {
+                    html += `<div class="cv-section"><div class="cv-section-title">${txt.cert}</div>${renderItems(state.cert)}</div>`;
+                }
+
+                html += `</div>`; // Close Body
+
+            } else if (template === 'silicon') {
+                // Grid Layout (Silicon Valley)
+                html += `
+                    <div class="cv-header">
+                        <img src="${state.img}" class="cv-img ${state.img.length < 100 ? 'hidden' : ''}">
+                        <h1 class="cv-name">${name}</h1>
+                        <div class="cv-role">${role}</div>
+                        <div class="cv-contact">
+                            ${email ? `<span>${email}</span>` : ''}
+                            ${phone ? `<span>${phone}</span>` : ''}
+                            ${loc ? `<span>${loc}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="main-grid">
+                        <div class="left-col">
+                            ${summary ? `<div class="cv-section"><div class="cv-section-title">${txt.profile}</div><div style="font-size:10pt;">${summary}</div></div>` : ''}
+                            ${state.exp.length > 0 ? `<div class="cv-section"><div class="cv-section-title">${txt.exp}</div>${renderItems(state.exp)}</div>` : ''}
+                            ${state.edu.length > 0 ? `<div class="cv-section"><div class="cv-section-title">${txt.edu}</div>${renderItems(state.edu)}</div>` : ''}
+                        </div>
+                        <div class="right-col">
+                            ${skills.length > 0 ? `<div class="cv-section"><div class="cv-section-title">${txt.skills}</div><div>${renderTags(skills, 'skill-tag')}</div></div>` : ''}
+                            ${languages.length > 0 ? `<div class="cv-section"><div class="cv-section-title">${txt.lang}</div><div>${renderTags(languages, 'skill-tag')}</div></div>` : ''}
+                            ${state.cert.length > 0 ? `<div class="cv-section"><div class="cv-section-title">${txt.cert}</div>${renderItems(state.cert)}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+
+            } else if (template === 'creative') {
+                // Sidebar Layout (Creative)
+                html += `
+                    <div class="left-col">
+                        <img src="${state.img}" class="cv-img ${state.img.length < 100 ? 'hidden' : ''}">
+                        
+                        <div class="left-section-title">${txt.contact}</div>
+                        ${email ? `<div class="contact-row"><i class="fas fa-envelope icon"></i>${email}</div>` : ''}
+                        ${phone ? `<div class="contact-row"><i class="fas fa-phone icon"></i>${phone}</div>` : ''}
+                        ${loc ? `<div class="contact-row"><i class="fas fa-map-marker-alt icon"></i>${loc}</div>` : ''}
+
+                        ${skills.length > 0 ? `<div class="left-section-title">${txt.skills}</div><div>${renderTags(skills, 'skill-tag')}</div>` : ''}
+                        ${languages.length > 0 ? `<div class="left-section-title">${txt.lang}</div><div>${renderTags(languages, 'skill-tag')}</div>` : ''}
+                    </div>
+
+                    <div class="right-col">
+                        <h1 class="cv-name">${name}</h1>
+                        <div class="cv-role">${role}</div>
+                        
+                        ${summary ? `<div class="cv-section"><div class="right-section-title">${txt.profile}</div><div>${summary}</div></div>` : ''}
+                        ${state.exp.length > 0 ? `<div class="cv-section"><div class="right-section-title">${txt.exp}</div>${renderItems(state.exp)}</div>` : ''}
+                        ${state.edu.length > 0 ? `<div class="cv-section"><div class="right-section-title">${txt.edu}</div>${renderItems(state.edu)}</div>` : ''}
+                        ${state.cert.length > 0 ? `<div class="cv-section"><div class="right-section-title">${txt.cert}</div>${renderItems(state.cert)}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            paper.innerHTML = html;
+        }
+
+        // --- PDF GENERATION ---
+        function generatePDF() {
+            const element = document.getElementById('cv-paper');
+            const opt = {
+                margin:       0,
+                filename:     'Professional_CV.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        // Initial Render
+        render();
+
+    </script>
+</body>
+</html>
